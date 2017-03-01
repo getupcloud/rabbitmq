@@ -1,0 +1,6 @@
+#!/bin/bash
+
+IMAGE=${1:-caruccio/rabbitmq}
+
+sudo docker build . -t ${IMAGE}:latest
+sudo docker push ${IMAGE}:latest

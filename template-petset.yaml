@@ -1,0 +1,155 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: rabbitmq-cluster
+metadata:
+  annotations:
+    description: RabbitMQ cluster template
+    iconClass: icon-rabbitmq
+    tags: queue,rabbitmq
+  name: rabbitmq
+
+parameters:
+- name: SERVICE_NAME
+  value: rabbitmq
+  required: true
+
+- name: RABBIT_COOKIE
+  from: '[a-zA-Z0-9]{60}'
+  generate: expression
+
+objects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    name: ${SERVICE_NAME}
+  spec:
+    ports:
+    - name: amqp
+      protocol: TCP
+      port: 5672
+      targetPort: 5672
+    - name: clustering
+      protocol: TCP
+      port: 25672
+      targetPort: 25672
+    - name: web
+      protocol: TCP
+      port: 15672
+      targetPort: 15672
+    - name: epmd
+      protocol: TCP
+      port: 4369
+      targetPort: 4369
+    selector:
+      name: ${SERVICE_NAME}
+    sessionAffinity: None
+    # A headless service to create DNS records
+    # *.${SERVICE_NAME}.${NAMESPACE}.svc.cluster.local
+    ClusterIP: None
+
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: rabbitmq-config
+  data:
+    enabled_plugins: |-
+      [rabbitmq_management].
+    rabbitmq.config: |-
+      [
+          {
+              rabbit, [
+                  {loopback_users, []},
+                  {cluster_nodes,
+                      {
+                          [
+                              'rabbit@rabbitmq-0',
+                              'rabbit@rabbitmq-1',
+                              'rabbit@rabbitmq-2'
+                          ],
+                          disc
+                      }
+                  }
+              ]
+          }
+      ].
+
+
+- apiVersion: apps/v1alpha1
+  kind: PetSet
+  metadata:
+    name: ${SERVICE_NAME}
+  spec:
+    serviceName: ${SERVICE_NAME}
+    replicas: 3
+    selector:
+      matchLabels:
+        name: ${SERVICE_NAME}
+        service: rabbitmq
+    template:
+      metadata:
+        labels:
+          name: ${SERVICE_NAME}
+          service: rabbitmq
+        annotations:
+          pod.alpha.kubernetes.io/initialized: "true"
+      spec:
+        serviceAccountName: rabbitmq
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        containers:
+        - image: caruccio/rabbitmq:latest
+          imagePullPolicy: Always
+          name: rabbitmq
+          env:
+          - name: START_DELAY
+            value: "30"
+          #- name: RABBITMQ_USE_LONGNAME
+          #  value: 'true'
+          - name: RABBIT_COOKIE
+            value: "${RABBIT_COOKIE}"
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: SERVICE_NAME
+            value: ${SERVICE_NAME}
+          ports:
+          - containerPort: 5672
+            protocol: TCP
+            name: ampq
+          - containerPort: 25672
+            protocol: TCP
+            name: clustering
+          - containerPort: 15672
+            protocol: TCP
+            name: web
+          - containerPort: 4369
+            protocol: TCP
+            name: epmd
+          volumeMounts:
+          - name: mnesia
+            mountPath: /var/lib/rabbitmq/mnesia
+          - name: rabbitmq-config
+            mountPath: /etc/rabbitmq/
+        volumes:
+        - name: mnesia
+          # Para liberar escrita no diretorio para o docker:
+          # node[0:0]$ sudo mkdir /opt/rabbitmq
+          # node[0:n]$ sudo chcon -t svirt_sandbox_file_t -R /opt/rabbitmq/
+          hostPath:
+            path: /opt/rabbitmq/mnesia
+        - name: rabbitmq-config
+          configMap:
+            name: rabbitmq-config
+
+# Dar SCC privileged para o SA
+# master$ oadm policy add-scc-to-user privileged system:serviceaccount:<namespace>:rabbitmq
+# master$ oadm policy add-scc-to-user anyuid system:serviceaccount:<namespace>:rabbitmq
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: rabbitmq
+
