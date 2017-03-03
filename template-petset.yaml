@@ -47,7 +47,9 @@ objects:
     sessionAffinity: None
     # A headless service to create DNS records
     # *.${SERVICE_NAME}.${NAMESPACE}.svc.cluster.local
-    ClusterIP: None
+    clusterIP: None
+    type: ClusterIP
+
 
 - apiVersion: v1
   kind: ConfigMap
