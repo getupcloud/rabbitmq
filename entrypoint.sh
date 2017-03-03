@@ -5,7 +5,7 @@ set -xe
 N=${HOSTNAME##*-}
 FQDN=${HOSTNAME}.${SERVICE_NAME}.${NAMESPACE}.svc.cluster.local
 
-# update resolv.conf
+# ensure we resolve service domain first
 sed "s/search \(.*\)/search ${SERVICE_NAME}.${NAMESPACE}.svc.cluster.local \1/g" < /etc/resolv.conf > /tmp/resolv.conf
 cat /tmp/resolv.conf > /etc/resolv.conf
 
