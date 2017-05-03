@@ -138,8 +138,8 @@ objects:
             mountPath: /etc/rabbitmq/
         volumes:
         - name: mnesia
-          # Para liberar escrita no diretorio para o docker:
-          # node[0:0]$ sudo mkdir /opt/rabbitmq
+          # Allows docker t write to local volume:
+          # node[0:n]$ sudo mkdir /opt/rabbitmq
           # node[0:n]$ sudo chcon -t svirt_sandbox_file_t -R /opt/rabbitmq/
           hostPath:
             path: /opt/rabbitmq/mnesia
@@ -147,7 +147,7 @@ objects:
           configMap:
             name: rabbitmq-config
 
-# Dar SCC privileged para o SA
+# Give privileged SCC to SeviceAccount
 # master$ oadm policy add-scc-to-user privileged system:serviceaccount:<namespace>:rabbitmq
 # master$ oadm policy add-scc-to-user anyuid system:serviceaccount:<namespace>:rabbitmq
 - apiVersion: v1
