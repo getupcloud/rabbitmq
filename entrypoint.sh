@@ -1,30 +1,19 @@
 #!/bin/bash
 
-set -xe
-
-N=${HOSTNAME##*-}
-FQDN=${HOSTNAME}.${SERVICE_NAME}.${NAMESPACE}.svc.cluster.local
-
-# ensure we resolve service domain first
-sed "s/search \(.*\)/search ${SERVICE_NAME}.${NAMESPACE}.svc.cluster.local \1/g" < /etc/resolv.conf > /tmp/resolv.conf
-cat /tmp/resolv.conf > /etc/resolv.conf
-
-if [ -n "${HOSTNAME}" -a -n "${SERVICE_NAME}" -a -n "${NAMESPACE}" ]; then
-    #export RABBITMQ_NODENAME="rabbit@${FQDN}"
-    export RABBITMQ_NODENAME="rabbit@${HOSTNAME}"
+if [ "${DEBUG}" == true ]; then
+    set -x
 fi
 
-if [ -n "${RABBIT_COOKIE}" ]; then
-    echo ${RABBIT_COOKIE} > /var/lib/rabbitmq/.erlang.cookie
-    chmod 600 /var/lib/rabbitmq/.erlang.cookie
-fi
+set -e
 
-if [ -n "$N" -a -z "$PRESERVE_DATABASE_DIR" ]; then
-    rm -rf /var/lib/rabbitmq/mnesia/rabbit@rabbitmq-$N*
-fi
+export $(cgroup-limits)
+export RABBITMQ_MAX_MEMORY=$(($MEMORY_LIMIT_IN_BYTES / 1024 / 1024 / 100 * 90))
 
-if [ -n "$N" -a "${N}" != 0 -a -n "${START_DELAY}" ]; then
-    sleep ${START_DELAY}
-fi
+cp -fv /config/* /etc/rabbitmq/
+for file in /etc/rabbitmq/*.in; do
+    echo Generating ${file%.in}
+    envsubst < $file > ${file%.in}
+done
 
+echo Starting rabbitmq
 exec "$@"
