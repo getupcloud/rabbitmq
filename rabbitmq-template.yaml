@@ -7,6 +7,10 @@ parameters:
   value: rabbitmq
 - name: POD_MEMORY
   value: "8Gi"
+- name: POD_CPU_MIN
+  value: "1"
+- name: POD_CPU_MAX
+  value: "1900m"
 - name: REPLICAS
   value: "1"
 - name: RABBITMQ_STORAGE_SIZE
@@ -96,7 +100,6 @@ objects:
     name: ${NAME}
   spec:
     type: ClusterIP
-    clusterIP: None
     sessionAffinity: None
     ports:
     - port: 9090
