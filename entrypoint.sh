@@ -15,7 +15,7 @@ for file in /etc/rabbitmq/*.in; do
     echo === Generating ${file%.in}
     envsubst < $file > ${file%.in}
     cat ${file%.in}
-    echo === End of ${file%.in}
+    echo -e "\n=== End of ${file%.in}"
 done
 
 RABBIT_COOKIE=${RABBIT_COOKIE:-rabbitmqcookie}
