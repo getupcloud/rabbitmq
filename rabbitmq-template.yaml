@@ -125,7 +125,7 @@ objects:
 - apiVersion: v1
   kind: ConfigMap
   metadata:
-    name: rabbitmq-config
+    name: ${NAME}-config
   data:
     enabled_plugins: |-
       [rabbitmq_management, rabbitmq_peer_discovery_k8s].
@@ -258,7 +258,7 @@ objects:
         volumes:
         - name: rabbitmq-config
           configMap:
-            name: rabbitmq-config
+            name: ${NAME}-config
     volumeClaimTemplates:
     - metadata:
         creationTimestamp: null
