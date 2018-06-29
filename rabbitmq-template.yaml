@@ -174,18 +174,6 @@ objects:
           app: ${NAME}
       spec:
         containers:
-        - image: kbudde/rabbitmq-exporter
-          name: rabbitmq-exporter
-          ports:
-          - containerPort: 9090
-            name: exporter
-          resources:
-            limits:
-              cpu: "100m"
-              memory: "64Mi"
-            requests:
-              cpu: "100m"
-              memory: "64Mi"
         - env:
           - name: POD_IP
             valueFrom:
@@ -250,6 +238,20 @@ objects:
             requests:
               cpu: "1"
               memory: "${POD_MEMORY}"
+              
+        - image: kbudde/rabbitmq-exporter
+          name: rabbitmq-exporter
+          ports:
+          - containerPort: 9090
+            name: exporter
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         schedulerName: default-scheduler
