@@ -8,7 +8,7 @@ set -e
 
 export $(cgroup-limits)
 export RABBITMQ_MAX_MEMORY=$(($MEMORY_LIMIT_IN_BYTES / 100 * 40))
-export RABBITMQ_STORAGE_SIZE=${RABBITMQ_STORAGE_SIZE/i/B}
+export RABBITMQ_DISK_FREE_LIMIT_ABSOLUTE=1GB
 
 cp -fv /config/* /etc/rabbitmq/
 for file in /etc/rabbitmq/*.in; do
