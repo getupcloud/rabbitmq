@@ -195,6 +195,8 @@ objects:
                 fieldPath: metadata.namespace
           - name: SERVICE_NAME
             value: ${NAME}
+          - name: HIPE_COMPILE
+            value: ${HIPE_COMPILE}
           image: getupcloud/rabbitmq:latest
           imagePullPolicy: Always
           name: rabbitmq
