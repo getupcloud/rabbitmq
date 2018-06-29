@@ -137,7 +137,7 @@ objects:
       listeners.tcp.default = 5672
       hipe_compile = ${HIPE_COMPILE}
       loopback_users = none
-      disk_free_limit.absolute = ${RABBITMQ_STORAGE_SIZE}
+      disk_free_limit.absolute = ${RABBITMQ_DISK_FREE_LIMIT_ABSOLUTE}
       management.listener.port = 15672
       management.listener.ssl = false
       cluster_formation.peer_discovery_backend = rabbit_peer_discovery_k8s
