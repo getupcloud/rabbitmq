@@ -23,4 +23,4 @@ echo ${RABBIT_COOKIE} > /var/lib/rabbitmq/.erlang.cookie
 chmod 600 /var/lib/rabbitmq/.erlang.cookie
 
 echo Starting rabbitmq
-exec "$@"
+exec docker-entrypoint.sh "$@"

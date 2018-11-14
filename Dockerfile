@@ -1,4 +1,4 @@
-FROM rabbitmq:management
+FROM rabbitmq:3
 
 WORKDIR /data
 
@@ -10,5 +10,3 @@ COPY entrypoint.sh /usr/src/
 COPY cgroup-limits  /usr/bin/cgroup-limits 
 
 ENTRYPOINT ["/usr/src/entrypoint.sh"]
-
-CMD ["rabbitmq-server"]
